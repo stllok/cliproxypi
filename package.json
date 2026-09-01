@@ -1,0 +1,41 @@
+{
+  "name": "cliproxypi",
+  "version": "0.1.0",
+  "description": "Pi/omo-ai CLIProxyAPI provider with live model discovery and models.dev metadata.",
+  "type": "module",
+  "license": "MIT",
+  "files": [
+    "extensions",
+    "src",
+    "README.md"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions"
+    ]
+  },
+  "scripts": {
+    "check": "bun run typecheck && bun run lint && bun test",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "test": "bun test"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": ">=0.84.0"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "ky": "^1.10.0",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.11",
+    "@earendil-works/pi-coding-agent": "0.84.4",
+    "@types/bun": "^1.2.22",
+    "typescript": "^5.9.3"
+  }
+}
