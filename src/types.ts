@@ -1,4 +1,5 @@
 import type { ProviderModelConfig } from "@earendil-works/pi-coding-agent";
+import type { Model } from "@earendil-works/pi-ai";
 
 export const THINKING_LEVELS = [
 	"off",
@@ -41,4 +42,13 @@ export type ProviderSettings = {
 	readonly gptFastMode: boolean;
 };
 
-export type ProviderModel = ProviderModelConfig & {};
+export type CliProxyApi =
+	| "openai-completions"
+	| "openai-responses";
+
+export type ProviderModel =
+	& Omit<ProviderModelConfig, "api" | "compat">
+	& {
+		readonly api?: CliProxyApi;
+		readonly compat?: Model<CliProxyApi>["compat"];
+	};

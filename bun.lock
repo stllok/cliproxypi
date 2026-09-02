@@ -15,9 +15,11 @@
         "typescript": "^5.9.3",
       },
       "peerDependencies": {
+        "@earendil-works/pi-ai": ">=0.84.0",
         "@earendil-works/pi-coding-agent": ">=0.84.0",
       },
       "optionalPeers": [
+        "@earendil-works/pi-ai",
         "@earendil-works/pi-coding-agent",
       ],
     },
