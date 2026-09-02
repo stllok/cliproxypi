@@ -106,7 +106,37 @@ export function applyFastMode(
 	return { ...payload, service_tier: "fast" };
 }
 
+export function convertKimiSystemMessageToUser(
+	payload: unknown,
+	modelId: string,
+): unknown {
+	if (
+		!isKimi(modelId) || !payload ||
+		typeof payload !== "object" || Array.isArray(payload) ||
+		!("messages" in payload) || !Array.isArray(payload.messages)
+	) {
+		return payload;
+	}
+	let changed = false;
+	const messages = payload.messages.map((message) => {
+		if (
+			!message || typeof message !== "object" || Array.isArray(message) ||
+			!("role" in message) || message.role !== "system"
+		) {
+			return message;
+		}
+		changed = true;
+		return { ...message, role: "user" };
+	});
+	return changed ? { ...payload, messages } : payload;
+}
+
 function isGpt(modelId: string): boolean {
 	const name = modelId.slice(modelId.lastIndexOf("/") + 1);
 	return name.toLowerCase().replaceAll(/[^a-z0-9]/g, "").startsWith("gpt");
+}
+
+function isKimi(modelId: string): boolean {
+	const name = modelId.slice(modelId.lastIndexOf("/") + 1);
+	return name.toLowerCase().replaceAll(/[^a-z0-9]/g, "").startsWith("kimi");
 }

@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { buildProviderModel, findModelsDevModel } from "../src/models.ts";
-import { applyFastMode } from "../src/provider.ts";
+import {
+	applyFastMode,
+	convertKimiSystemMessageToUser,
+} from "../src/provider.ts";
 import type {
 	CpaModel,
 	ModelsDevModel,
@@ -240,6 +243,22 @@ describe("model enrichment", () => {
 				settings,
 			).compat,
 		).toEqual({ supportsDeveloperRole: false });
+	});
+
+	test("converts Kimi system messages to user messages", () => {
+		expect(
+			convertKimiSystemMessageToUser({
+				messages: [
+					{ role: "system", content: "Follow instructions." },
+					{ role: "assistant", content: "Ready." },
+				],
+			}, "kimi-k3"),
+		).toEqual({
+			messages: [
+				{ role: "user", content: "Follow instructions." },
+				{ role: "assistant", content: "Ready." },
+			],
+		});
 	});
 
 	test("persistent fast mode modifies GPT request payloads only", () => {

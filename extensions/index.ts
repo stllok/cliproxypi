@@ -18,6 +18,7 @@ import {
 } from "../src/auth.ts";
 import {
 	applyFastMode,
+	convertKimiSystemMessageToUser,
 	discoverProviderModels,
 	type JsonGetter,
 } from "../src/provider.ts";
@@ -181,8 +182,12 @@ export async function registerCliProxyApi(
 			ctx.model.id,
 			settings.gptFastMode,
 		);
-		if (payload === event.payload) return;
-		return { payload };
+		const compatiblePayload = convertKimiSystemMessageToUser(
+			payload,
+			ctx.model.id,
+		);
+		if (compatiblePayload === event.payload) return;
+		return { payload: compatiblePayload };
 	});
 }
 
