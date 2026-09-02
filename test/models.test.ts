@@ -34,6 +34,7 @@ const settings = {
 	gpt56ContextPolicy: "codex",
 	customContext: {},
 	gptFastMode: false,
+	thinkingLevelSource: {},
 } satisfies ProviderSettings;
 
 describe("model enrichment", () => {
@@ -52,6 +53,7 @@ describe("model enrichment", () => {
 				id: "gb10/glm5.3-flash",
 				ownedBy: "gb10",
 				reasoningLevels: ["low", "high"],
+				cliproxyReasoningLevels: ["low", "high", "max"],
 			},
 			catalog[0],
 			settings,
@@ -71,9 +73,63 @@ describe("model enrichment", () => {
 				medium: null,
 				high: "high",
 				xhigh: null,
-				max: null,
+				max: "max",
 			},
 		});
+	});
+
+	test("selects per-model thinking-level source", () => {
+		const model = {
+			id: "qwen3.8-max",
+			reasoningLevels: ["low", "medium"],
+			cliproxyReasoningLevels: ["medium", "xhigh"],
+		} satisfies CpaModel;
+
+		expect(
+			buildProviderModel(model, undefined, {
+				...settings,
+				thinkingLevelSource: { "qwen3.8-max": "api" },
+			}).thinkingLevelMap,
+		).toMatchObject({ low: "low", medium: "medium", xhigh: null });
+		expect(
+			buildProviderModel(model, undefined, {
+				...settings,
+				thinkingLevelSource: { "qwen3.8-max": "hardcoded" },
+			}).thinkingLevelMap,
+		).toMatchObject({ low: "low", medium: "medium", xhigh: "xhigh" });
+		expect(
+			buildProviderModel(model, undefined, {
+				...settings,
+				thinkingLevelSource: { "qwen3.8-max": "all" },
+			}).thinkingLevelMap,
+		).toEqual({
+			off: "none",
+			minimal: "minimal",
+			low: "low",
+			medium: "medium",
+			high: "high",
+			xhigh: "xhigh",
+			max: "max",
+		});
+	});
+
+	test("hardcodes documented Kimi and GLM effort levels", () => {
+		for (const id of ["kimi-k3", "glm-5.3-flash"]) {
+			const model = buildProviderModel(
+				{ id, reasoningLevels: [], cliproxyReasoningLevels: [] },
+				undefined,
+				{
+					...settings,
+					thinkingLevelSource: { [id]: "hardcoded" },
+				},
+			);
+			expect(model.thinkingLevelMap).toMatchObject({
+				off: null,
+				low: "low",
+				high: "high",
+				max: "max",
+			});
+		}
 	});
 
 	test("uses configured GPT-5.6 context profile", () => {

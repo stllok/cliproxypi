@@ -18,6 +18,20 @@ const cpaModelSchema = z
 	.passthrough();
 
 const cpaResponseSchema = z.object({ data: z.array(cpaModelSchema) });
+const cpaThinkingLevelSchema = z.union([
+	z.string(),
+	z.object({ effort: z.string() }).passthrough(),
+]);
+const cpaThinkingModelSchema = z
+	.object({
+		slug: z.string().optional(),
+		id: z.string().optional(),
+		supported_reasoning_levels: z.array(cpaThinkingLevelSchema).optional(),
+	})
+	.passthrough();
+const cpaThinkingResponseSchema = z.object({
+	models: z.array(cpaThinkingModelSchema),
+});
 
 const metadataSchema = z
 	.object({
@@ -56,6 +70,12 @@ function reasoningLevels(
 		record.reasoning_efforts ??
 		record.reasoning_levels ??
 		[];
+	return normalizeReasoningLevels(advertised);
+}
+
+function normalizeReasoningLevels(
+	advertised: readonly string[],
+): ThinkingLevel[] {
 	const allowed = new Set<string>(THINKING_LEVELS);
 	return [
 		...new Set(
@@ -66,6 +86,20 @@ function reasoningLevels(
 				.filter((level): level is ThinkingLevel => allowed.has(level)),
 		),
 	];
+}
+
+export function parseCpaThinkingLevels(
+	payload: unknown,
+): Readonly<Record<string, readonly ThinkingLevel[]>> {
+	const parsed = cpaThinkingResponseSchema.parse(payload);
+	return Object.fromEntries(parsed.models.flatMap((model) => {
+		const id = model.slug ?? model.id;
+		if (!id) return [];
+		const advertised = (model.supported_reasoning_levels ?? []).map(
+			(level) => typeof level === "string" ? level : level.effort,
+		);
+		return [[id, normalizeReasoningLevels(advertised)]];
+	}));
 }
 
 export function parseCpaModels(payload: unknown): CpaModel[] {

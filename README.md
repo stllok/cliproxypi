@@ -52,6 +52,8 @@ Matched metadata supplies:
 Reasoning controls use the levels advertised by CLIProxyAPI through
 `supported_reasoning_efforts`, `supported_reasoning_levels`,
 `reasoning_efforts`, or `reasoning_levels`. Unsupported Pi levels are hidden.
+Newer CLIProxyAPI builds also expose a rich
+`/v1/models?client_version=pi` catalog.
 
 ## Persistent settings
 
@@ -72,6 +74,11 @@ The native settings panel writes the `cliproxypi` section in
   removes the override. GPT-5.6 overrides remain capped at 1,000,000.
 - **GPT fast mode**: persistent on/off setting. When enabled, GPT requests carry
   `service_tier: "fast"`; no `/fast` session command is needed.
+- **Model thinking levels**: choose a source per model:
+  - `cliproxyapi`: rich CLIProxyAPI catalog (default)
+  - `api`: fields from the standard `/v1/models` response
+  - `hardcoded`: known Kimi K3, Qwen 3.8, and GLM 5.3 Flash capabilities
+  - `all`: force `none`, `minimal`, `low`, `medium`, `high`, `xhigh`, and `max`
 
 Equivalent settings:
 
@@ -82,7 +89,11 @@ Equivalent settings:
     "customContext": {
       "kimi-k3-256k": 256000
     },
-    "gptFastMode": true
+    "gptFastMode": true,
+    "thinkingLevelSource": {
+      "kimi-k3": "hardcoded",
+      "local/qwen3.8-27b": "all"
+    }
   }
 }
 ```

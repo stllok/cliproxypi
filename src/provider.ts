@@ -3,7 +3,11 @@ import type {
 	ProviderModel,
 	ProviderSettings,
 } from "./types.ts";
-import { parseCpaModels, parseModelsDev } from "./discovery.ts";
+import {
+	parseCpaModels,
+	parseCpaThinkingLevels,
+	parseModelsDev,
+} from "./discovery.ts";
 import { buildProviderModel, findModelsDevModel } from "./models.ts";
 import { ZodError } from "zod";
 
@@ -29,10 +33,12 @@ export async function discoverProviderModels(
 		? { Authorization: `Bearer ${options.apiKey}` }
 		: {};
 	const baseUrl = options.baseUrl.replace(/\/+$/, "");
-	const [cpaResult, metadataResult] = await Promise.allSettled([
-		options.getJson(`${baseUrl}/models`, headers),
-		options.getJson(options.modelsDevUrl ?? MODELS_DEV_URL, {}),
-	]);
+	const [cpaResult, richCatalogResult, metadataResult] = await Promise
+		.allSettled([
+			options.getJson(`${baseUrl}/models`, headers),
+			options.getJson(`${baseUrl}/models?client_version=pi`, headers),
+			options.getJson(options.modelsDevUrl ?? MODELS_DEV_URL, {}),
+		]);
 	if (cpaResult.status === "rejected") {
 		const message = cpaResult.reason instanceof Error
 			? cpaResult.reason.message
@@ -43,6 +49,14 @@ export async function discoverProviderModels(
 		return [];
 	}
 	const cpaModels = parseCpaModels(cpaResult.value);
+	let richLevels: ReturnType<typeof parseCpaThinkingLevels> = {};
+	if (richCatalogResult.status === "fulfilled") {
+		try {
+			richLevels = parseCpaThinkingLevels(richCatalogResult.value);
+		} catch (error) {
+			if (!(error instanceof ZodError)) throw error;
+		}
+	}
 	let catalog: ModelsDevModel[] = [];
 	if (metadataResult.status === "fulfilled") {
 		try {
@@ -68,7 +82,10 @@ export async function discoverProviderModels(
 	}
 	return cpaModels.map((model) =>
 		buildProviderModel(
-			model,
+			{
+				...model,
+				cliproxyReasoningLevels: richLevels[model.id] ?? [],
+			},
 			findModelsDevModel(model, catalog),
 			options.settings,
 		)

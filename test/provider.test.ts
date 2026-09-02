@@ -6,10 +6,11 @@ const settings = {
 	gpt56ContextPolicy: "api",
 	customContext: {},
 	gptFastMode: false,
+	thinkingLevelSource: {},
 } satisfies ProviderSettings;
 
 describe("startup discovery", () => {
-	test("fetches CPA and models.dev on every invocation", async () => {
+	test("fetches standard, rich CPA, and models.dev catalogs", async () => {
 		const calls: string[] = [];
 		const getJson = async (url: string): Promise<unknown> => {
 			calls.push(url);
@@ -18,6 +19,14 @@ describe("startup discovery", () => {
 					data: [{
 						id: "gpt-5.6-sol",
 						supported_reasoning_efforts: ["high"],
+					}],
+				};
+			}
+			if (url.endsWith("/models?client_version=pi")) {
+				return {
+					models: [{
+						slug: "gpt-5.6-sol",
+						supported_reasoning_levels: [{ effort: "high" }],
 					}],
 				};
 			}
@@ -49,8 +58,10 @@ describe("startup discovery", () => {
 
 		expect(calls).toEqual([
 			"http://localhost:8317/v1/models",
+			"http://localhost:8317/v1/models?client_version=pi",
 			"https://models.dev/api.json",
 			"http://localhost:8317/v1/models",
+			"http://localhost:8317/v1/models?client_version=pi",
 			"https://models.dev/api.json",
 		]);
 		expect(first[0]).toMatchObject({
@@ -64,6 +75,14 @@ describe("startup discovery", () => {
 	test("keeps live CPA models when models.dev is unavailable", async () => {
 		const getJson = async (url: string): Promise<unknown> => {
 			if (url.endsWith("/models")) {
+				return {
+					data: [{
+						id: "gpt-5.6-sol",
+						supported_reasoning_efforts: ["low", "high"],
+					}],
+				};
+			}
+			if (url.endsWith("/models?client_version=pi")) {
 				return {
 					data: [{
 						id: "gpt-5.6-sol",

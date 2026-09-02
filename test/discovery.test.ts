@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { parseCpaModels, parseModelsDev } from "../src/discovery.ts";
+import {
+	parseCpaModels,
+	parseCpaThinkingLevels,
+	parseModelsDev,
+} from "../src/discovery.ts";
 
 describe("CPA discovery", () => {
 	test("keeps model IDs and advertised reasoning levels", () => {
@@ -20,6 +24,23 @@ describe("CPA discovery", () => {
 				reasoningLevels: ["low", "high"],
 			},
 		]);
+	});
+
+	test("reads CliproxyAPI rich-catalog reasoning levels", () => {
+		const levels = parseCpaThinkingLevels({
+			models: [{
+				slug: "gb10/glm5.3-flash",
+				supported_reasoning_levels: [
+					{ effort: "low" },
+					{ effort: "high" },
+					{ effort: "max" },
+				],
+			}],
+		});
+
+		expect(levels).toEqual({
+			"gb10/glm5.3-flash": ["low", "high", "max"],
+		});
 	});
 
 	test("parses provider-qualified models.dev metadata", () => {

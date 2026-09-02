@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS: ProviderSettings = {
 	gpt56ContextPolicy: "codex",
 	customContext: {},
 	gptFastMode: false,
+	thinkingLevelSource: {},
 };
 
 const providerSettingsSchema = z
@@ -18,6 +19,10 @@ const providerSettingsSchema = z
 		customContext: z.record(z.string().min(1), z.number().int().positive())
 			.default({}),
 		gptFastMode: z.boolean().default(false),
+		thinkingLevelSource: z.record(
+			z.string().min(1),
+			z.enum(["hardcoded", "api", "cliproxyapi", "all"]),
+		).default({}),
 	})
 	.default(DEFAULT_SETTINGS);
 const rootSettingsSchema = z.record(z.string(), z.unknown());

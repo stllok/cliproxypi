@@ -5,6 +5,7 @@ import {
 	type ProviderModel,
 	type ProviderSettings,
 	THINKING_LEVELS,
+	type ThinkingLevel,
 } from "./types.ts";
 
 export const GPT_56_CONTEXT = {
@@ -52,7 +53,20 @@ export function buildProviderModel(
 		: gpt56
 		? Math.min(customContext, GPT_56_CONTEXT.api)
 		: customContext;
-	const supported = new Set(model.reasoningLevels);
+	const source = settings.thinkingLevelSource[model.id] ?? "cliproxyapi";
+	const selectedLevels = (() => {
+		switch (source) {
+			case "api":
+				return model.reasoningLevels;
+			case "cliproxyapi":
+				return model.cliproxyReasoningLevels ?? [];
+			case "hardcoded":
+				return hardcodedThinkingLevels(model.id);
+			case "all":
+				return THINKING_LEVELS;
+		}
+	})();
+	const supported = new Set(selectedLevels);
 	const thinkingLevelMap = Object.fromEntries(
 		THINKING_LEVELS.map((
 			level,
@@ -61,8 +75,9 @@ export function buildProviderModel(
 			supported.has(level) ? (level === "off" ? "none" : level) : null,
 		]),
 	);
-	const reasoning = model.reasoningLevels.some((level) => level !== "off") ||
-		(model.reasoningLevels.length === 0 && (metadata?.reasoning ?? false));
+	const reasoning = selectedLevels.some((level) => level !== "off") ||
+		model.reasoningLevels.some((level) => level !== "off") ||
+		(metadata?.reasoning ?? false);
 	const input = metadata?.input.includes("image")
 		? ["text", "image"] as const
 		: ["text"] as const;
@@ -71,13 +86,25 @@ export function buildProviderModel(
 		name: metadata?.name ?? model.id,
 		api: gpt56 ? "openai-responses" : "openai-completions",
 		reasoning,
-		...(model.reasoningLevels.length > 0 ? { thinkingLevelMap } : {}),
+		...(selectedLevels.length > 0 ? { thinkingLevelMap } : {}),
 		input: [...input],
 		cost: metadata?.cost ??
 			{ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
 		contextWindow,
 		maxTokens: metadata?.maxTokens ?? 16_384,
 	};
+}
+
+function hardcodedThinkingLevels(id: string): readonly ThinkingLevel[] {
+	const normalized = normalizeModelId(id);
+	if (normalized.startsWith("kimik3")) return ["low", "high", "max"];
+	if (normalized.startsWith("glm53flash")) return ["low", "high", "max"];
+	if (normalized.startsWith("qwen38max")) return ["low", "medium", "xhigh"];
+	if (normalized.startsWith("qwen38flash")) return ["high", "max"];
+	if (normalized.startsWith("qwen38")) {
+		return ["off", "low", "medium", "xhigh"];
+	}
+	return [];
 }
 
 function normalizeModelId(id: string): string {

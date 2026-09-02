@@ -11,11 +11,19 @@ export const THINKING_LEVELS = [
 	"max",
 ] as const;
 export type ThinkingLevel = (typeof THINKING_LEVELS)[number];
+export const THINKING_LEVEL_SOURCES = [
+	"hardcoded",
+	"api",
+	"cliproxyapi",
+	"all",
+] as const;
+export type ThinkingLevelSource = (typeof THINKING_LEVEL_SOURCES)[number];
 
 export type CpaModel = {
 	readonly id: string;
 	readonly ownedBy?: string;
 	readonly reasoningLevels: readonly ThinkingLevel[];
+	readonly cliproxyReasoningLevels?: readonly ThinkingLevel[];
 };
 
 export type ModelsDevModel = {
@@ -40,6 +48,7 @@ export type ProviderSettings = {
 	readonly gpt56ContextPolicy: ContextPolicy;
 	readonly customContext: Readonly<Record<string, number>>;
 	readonly gptFastMode: boolean;
+	readonly thinkingLevelSource: Readonly<Record<string, ThinkingLevelSource>>;
 };
 
 export type CliProxyApi =

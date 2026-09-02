@@ -12,12 +12,20 @@ describe("persistent settings", () => {
 					gpt56ContextPolicy: "api",
 					customContext: { "kimi-k3-256k": 256_000 },
 					gptFastMode: true,
+					thinkingLevelSource: {
+						"kimi-k3": "hardcoded",
+						"qwen3.8-max": "all",
+					},
 				},
 			}),
 		).toEqual({
 			gpt56ContextPolicy: "api",
 			customContext: { "kimi-k3-256k": 256_000 },
 			gptFastMode: true,
+			thinkingLevelSource: {
+				"kimi-k3": "hardcoded",
+				"qwen3.8-max": "all",
+			},
 		});
 	});
 
@@ -37,6 +45,7 @@ describe("persistent settings", () => {
 					gpt56ContextPolicy: "codex",
 					customContext: {},
 					gptFastMode: false,
+					thinkingLevelSource: {},
 				},
 			),
 		).toEqual({
@@ -45,6 +54,7 @@ describe("persistent settings", () => {
 				gpt56ContextPolicy: "codex",
 				customContext: {},
 				gptFastMode: false,
+				thinkingLevelSource: {},
 			},
 		});
 	});
