@@ -27,7 +27,11 @@ export function credentialBaseUrl(
 	);
 }
 
-export function createCliProxyApiAuth(defaultBaseUrl: string): ApiKeyAuth {
+export function createCliProxyApiAuth(
+	defaultBaseUrl: string,
+	refreshAfterLogin?: (credential: ApiKeyCredential) => void,
+): ApiKeyAuth {
+	let pendingLoginRefresh: ApiKeyCredential | undefined;
 	return {
 		name: "CLIProxyAPI endpoint and API key",
 		async login({ prompt }) {
@@ -46,18 +50,17 @@ export function createCliProxyApiAuth(defaultBaseUrl: string): ApiKeyAuth {
 				})
 			).trim();
 			const env: ProviderEnv = { [BASE_URL_ENV]: baseUrl };
-			return {
+			const credential: ApiKeyCredential = {
 				type: "api_key",
 				...(key ? { key } : {}),
 				env,
 			};
+			pendingLoginRefresh = credential;
+			return credential;
 		},
 		async resolve({ ctx, credential }) {
 			const configuredBaseUrl = await ctx.env(BASE_URL_ENV);
 			const configuredApiKey = await ctx.env(API_KEY_ENV);
-			if (!credential && !configuredBaseUrl && !configuredApiKey) {
-				return undefined;
-			}
 
 			const baseUrl = credentialBaseUrl(
 				credential,
@@ -65,7 +68,7 @@ export function createCliProxyApiAuth(defaultBaseUrl: string): ApiKeyAuth {
 				configuredBaseUrl,
 			);
 			const apiKey = credential?.key ?? configuredApiKey;
-			return {
+			const result = {
 				auth: {
 					...(apiKey ? { apiKey } : {}),
 					baseUrl,
@@ -74,8 +77,16 @@ export function createCliProxyApiAuth(defaultBaseUrl: string): ApiKeyAuth {
 					? "stored credential"
 					: configuredApiKey
 					? API_KEY_ENV
-					: BASE_URL_ENV,
+					: configuredBaseUrl
+					? BASE_URL_ENV
+					: "default endpoint",
 			};
+			if (pendingLoginRefresh) {
+				const completedLogin = pendingLoginRefresh;
+				pendingLoginRefresh = undefined;
+				refreshAfterLogin?.(completedLogin);
+			}
+			return result;
 		},
 	};
 }

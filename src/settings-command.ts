@@ -34,7 +34,7 @@ const THINKING_SOURCE_OPTIONS = [
 
 export function registerSettingsCommand(
 	pi: ExtensionAPI,
-	modelIds: readonly string[],
+	providerName: string,
 ): void {
 	pi.registerCommand("cliproxyapi", {
 		description: "Configure CLIProxyAPI model limits and thinking levels.",
@@ -46,7 +46,12 @@ export function registerSettingsCommand(
 				ctx.ui.notify("Usage: /cliproxyapi [settings]", "warning");
 				return;
 			}
-			await openSettingsPanel(ctx, modelIds);
+			await openSettingsPanel(
+				ctx,
+				ctx.modelRegistry.getAll()
+					.filter((model) => model.provider === providerName)
+					.map((model) => model.id),
+			);
 		},
 	});
 }
