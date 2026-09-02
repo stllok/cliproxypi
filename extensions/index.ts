@@ -27,6 +27,14 @@ import type { CliProxyApi } from "../src/types.ts";
 
 const DEFAULT_BASE_URL = "http://localhost:8317/v1";
 const DEFAULT_PROVIDER_NAME = "cliproxyapi";
+const PI_AI_ENTRYPOINT = import.meta.resolve("@earendil-works/pi-ai");
+
+export function piAiApiModuleUrl(
+	entrypoint: string,
+	api: CliProxyApi,
+): string {
+	return new URL(`./api/${api}.js`, entrypoint).href;
+}
 
 function storedCredential(providerName: string): ApiKeyCredential | undefined {
 	const credential = readStoredCredential(providerName);
@@ -116,10 +124,10 @@ export default async function cliproxypi(pi: ExtensionAPI): Promise<void> {
 		},
 		api: {
 			"openai-completions": lazyApi(() =>
-				import("@earendil-works/pi-ai/api/openai-completions")
+				import(piAiApiModuleUrl(PI_AI_ENTRYPOINT, "openai-completions"))
 			),
 			"openai-responses": lazyApi(() =>
-				import("@earendil-works/pi-ai/api/openai-responses")
+				import(piAiApiModuleUrl(PI_AI_ENTRYPOINT, "openai-responses"))
 			),
 		},
 	});
