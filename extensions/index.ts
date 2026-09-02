@@ -26,7 +26,7 @@ import { loadProviderSettings } from "../src/settings.ts";
 import type { CliProxyApi } from "../src/types.ts";
 
 const DEFAULT_BASE_URL = "http://localhost:8317/v1";
-const DEFAULT_PROVIDER_NAME = "cliproxyapi";
+export const DEFAULT_PROVIDER_NAME = "cliproxypi";
 const PI_AI_ENTRYPOINT = import.meta.resolve("@earendil-works/pi-ai");
 
 export function piAiApiModuleUrl(

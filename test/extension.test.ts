@@ -1,5 +1,12 @@
 import { expect, test } from "bun:test";
-import { piAiApiModuleUrl } from "../extensions/index.ts";
+import {
+	DEFAULT_PROVIDER_NAME,
+	piAiApiModuleUrl,
+} from "../extensions/index.ts";
+
+test("uses cliproxypi as the provider credential key", () => {
+	expect(DEFAULT_PROVIDER_NAME).toBe("cliproxypi");
+});
 
 test("resolves API module beside a compatibility entrypoint", () => {
 	expect(
