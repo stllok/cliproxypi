@@ -5,6 +5,7 @@ import type { ProviderSettings } from "../src/types.ts";
 const settings = {
 	gpt56ContextPolicy: "api",
 	customContext: {},
+	customMaxTokens: {},
 	gptFastMode: false,
 	thinkingLevelSource: {},
 } satisfies ProviderSettings;

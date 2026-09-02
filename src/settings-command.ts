@@ -10,7 +10,8 @@ import type { ProviderSettings, ThinkingLevelSource } from "./types.ts";
 const DONE = "Done";
 const CONTEXT_POLICY = "GPT-5.6 context policy";
 const FAST_MODE = "GPT fast mode";
-const CUSTOM_CONTEXT = "Custom model context";
+const CUSTOM_INPUT = "Custom model input/context tokens";
+const CUSTOM_OUTPUT = "Custom model output tokens";
 const THINKING_LEVELS = "Model thinking levels";
 const DEFAULT_THINKING_SOURCE = "cliproxyapi";
 const THINKING_SOURCE_OPTIONS = [
@@ -76,7 +77,8 @@ export async function openSettingsPanel(
 		const action = await ctx.ui.select("CLIProxyAPI settings", [
 			`${CONTEXT_POLICY}: ${settings.gpt56ContextPolicy}`,
 			`${FAST_MODE}: ${settings.gptFastMode ? "on" : "off"}`,
-			CUSTOM_CONTEXT,
+			CUSTOM_INPUT,
+			CUSTOM_OUTPUT,
 			THINKING_LEVELS,
 			DONE,
 		]);
@@ -114,10 +116,18 @@ export async function openSettingsPanel(
 			continue;
 		}
 
-		if (action === CUSTOM_CONTEXT) {
-			const next = await editCustomContext(ctx, settings, modelIds);
-			if (next !== settings) {
-				settings = next;
+		if (action === CUSTOM_INPUT || action === CUSTOM_OUTPUT) {
+			const key = action === CUSTOM_INPUT
+				? "customContext"
+				: "customMaxTokens";
+			const next = await editCustomLimit(
+				ctx,
+				settings[key],
+				modelIds,
+				action === CUSTOM_INPUT ? "Input/context" : "Output",
+			);
+			if (next !== settings[key]) {
+				settings = { ...settings, [key]: next };
 				changed = true;
 			}
 			continue;
@@ -175,35 +185,36 @@ async function editThinkingLevels(
 	return { ...settings, thinkingLevelSource };
 }
 
-async function editCustomContext(
+async function editCustomLimit(
 	ctx: ExtensionCommandContext,
-	settings: ProviderSettings,
+	currentValues: Readonly<Record<string, number>>,
 	modelIds: readonly string[],
-): Promise<ProviderSettings> {
+	label: string,
+): Promise<Readonly<Record<string, number>>> {
 	if (modelIds.length === 0) {
 		ctx.ui.notify("No CLIProxyAPI models are available.", "warning");
-		return settings;
+		return currentValues;
 	}
 	const modelId = await ctx.ui.select(
-		"Model context override",
+		`${label} token override`,
 		[...modelIds].sort(),
 	);
-	if (!modelId) return settings;
+	if (!modelId) return currentValues;
 
-	const current = settings.customContext[modelId];
+	const current = currentValues[modelId];
 	const value = await ctx.ui.input(
-		`Context tokens for ${modelId}`,
+		`${label} tokens for ${modelId}`,
 		current === undefined
 			? "positive integer, or auto"
 			: `${current} (or auto)`,
 	);
-	if (value === undefined) return settings;
+	if (value === undefined) return currentValues;
 
 	const normalized = value.trim().toLowerCase();
-	const customContext = { ...settings.customContext };
+	const next = { ...currentValues };
 	if (normalized === "" || normalized === "auto") {
-		delete customContext[modelId];
-		return { ...settings, customContext };
+		delete next[modelId];
+		return next;
 	}
 	const numeric = Number(normalized);
 	if (
@@ -211,11 +222,11 @@ async function editCustomContext(
 		!Number.isSafeInteger(numeric)
 	) {
 		ctx.ui.notify(
-			"Context window must be a positive integer or auto.",
+			`${label} tokens must be a positive integer or auto.`,
 			"error",
 		);
-		return settings;
+		return currentValues;
 	}
-	customContext[modelId] = numeric;
-	return { ...settings, customContext };
+	next[modelId] = numeric;
+	return next;
 }

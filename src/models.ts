@@ -47,6 +47,8 @@ export function buildProviderModel(
 	const customContext = settings.customContext[model.id];
 	const derivedContext = gpt56
 		? GPT_56_CONTEXT[settings.gpt56ContextPolicy]
+		: normalizeModelId(model.id) === "kimik3256k"
+		? 256_000
 		: metadata?.contextWindow ?? 128_000;
 	const contextWindow = customContext === undefined
 		? derivedContext
@@ -85,13 +87,15 @@ export function buildProviderModel(
 		id: model.id,
 		name: metadata?.name ?? model.id,
 		api: gpt56 ? "openai-responses" : "openai-completions",
+		...(gpt56 ? {} : { compat: { supportsDeveloperRole: false } }),
 		reasoning,
 		...(selectedLevels.length > 0 ? { thinkingLevelMap } : {}),
 		input: [...input],
 		cost: metadata?.cost ??
 			{ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
 		contextWindow,
-		maxTokens: metadata?.maxTokens ?? 16_384,
+		maxTokens: settings.customMaxTokens[model.id] ??
+			metadata?.maxTokens ?? 16_384,
 	};
 }
 

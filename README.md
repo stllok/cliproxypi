@@ -70,8 +70,11 @@ The native settings panel writes the `cliproxypi` section in
   - `codex-save`: 272,000 tokens
   - `codex`: 400,000 tokens
   - `api`: 1,000,000 tokens
-- **Custom model context**: positive token count per discovered model; `auto`
-  removes the override. GPT-5.6 overrides remain capped at 1,000,000.
+- **Custom model input/context tokens**: positive token count per discovered
+  model; `auto` removes the override. GPT-5.6 overrides remain capped at
+  1,000,000.
+- **Custom model output tokens**: positive token count per discovered model;
+  `auto` restores the models.dev value.
 - **GPT fast mode**: persistent on/off setting. When enabled, GPT requests carry
   `service_tier: "fast"`; no `/fast` session command is needed.
 - **Model thinking levels**: choose a source per model:
@@ -89,6 +92,9 @@ Equivalent settings:
     "customContext": {
       "kimi-k3-256k": 256000
     },
+    "customMaxTokens": {
+      "kimi-k3-256k": 64000
+    },
     "gptFastMode": true,
     "thinkingLevelSource": {
       "kimi-k3": "hardcoded",
@@ -97,6 +103,21 @@ Equivalent settings:
   }
 }
 ```
+
+For slow local models, Senpi's provider stream-start watchdog is configured at
+the root of the same file. Ten minutes:
+
+```json
+{
+  "retry": {
+    "provider": {
+      "streamStartTimeoutMs": 600000
+    }
+  }
+}
+```
+
+Use `0` instead to disable the stream-start watchdog.
 
 ## Check
 

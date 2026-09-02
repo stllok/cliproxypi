@@ -7,6 +7,7 @@ export const SETTINGS_NAMESPACE = "cliproxypi";
 export const DEFAULT_SETTINGS: ProviderSettings = {
 	gpt56ContextPolicy: "codex",
 	customContext: {},
+	customMaxTokens: {},
 	gptFastMode: false,
 	thinkingLevelSource: {},
 };
@@ -17,6 +18,11 @@ const providerSettingsSchema = z
 			"codex",
 		),
 		customContext: z.record(z.string().min(1), z.number().int().positive())
+			.default({}),
+		customMaxTokens: z.record(
+			z.string().min(1),
+			z.number().int().positive(),
+		)
 			.default({}),
 		gptFastMode: z.boolean().default(false),
 		thinkingLevelSource: z.record(

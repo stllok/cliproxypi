@@ -11,6 +11,7 @@ describe("persistent settings", () => {
 				cliproxypi: {
 					gpt56ContextPolicy: "api",
 					customContext: { "kimi-k3-256k": 256_000 },
+					customMaxTokens: { "kimi-k3-256k": 64_000 },
 					gptFastMode: true,
 					thinkingLevelSource: {
 						"kimi-k3": "hardcoded",
@@ -21,6 +22,7 @@ describe("persistent settings", () => {
 		).toEqual({
 			gpt56ContextPolicy: "api",
 			customContext: { "kimi-k3-256k": 256_000 },
+			customMaxTokens: { "kimi-k3-256k": 64_000 },
 			gptFastMode: true,
 			thinkingLevelSource: {
 				"kimi-k3": "hardcoded",
@@ -44,6 +46,7 @@ describe("persistent settings", () => {
 				{
 					gpt56ContextPolicy: "codex",
 					customContext: {},
+					customMaxTokens: {},
 					gptFastMode: false,
 					thinkingLevelSource: {},
 				},
@@ -53,6 +56,7 @@ describe("persistent settings", () => {
 			cliproxypi: {
 				gpt56ContextPolicy: "codex",
 				customContext: {},
+				customMaxTokens: {},
 				gptFastMode: false,
 				thinkingLevelSource: {},
 			},

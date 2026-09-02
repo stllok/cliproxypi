@@ -33,6 +33,7 @@ const catalog: readonly ModelsDevModel[] = [
 const settings = {
 	gpt56ContextPolicy: "codex",
 	customContext: {},
+	customMaxTokens: {},
 	gptFastMode: false,
 	thinkingLevelSource: {},
 } satisfies ProviderSettings;
@@ -175,6 +176,70 @@ describe("model enrichment", () => {
 				customContext: { "gpt-5.6-sol": 900_000 },
 			}).contextWindow,
 		).toBe(900_000);
+	});
+
+	test("orders context sources as custom, extension, models.dev, fallback", () => {
+		const kimi = {
+			id: "kimi-k3-256k",
+			reasoningLevels: [],
+		} satisfies CpaModel;
+		const baseMetadata = catalog[0];
+		if (!baseMetadata) throw new Error("Expected models.dev fixture");
+		const metadata = {
+			...baseMetadata,
+			id: kimi.id,
+			contextWindow: 1_048_576,
+		} satisfies ModelsDevModel;
+
+		expect(
+			buildProviderModel(kimi, metadata, {
+				...settings,
+				customContext: { [kimi.id]: 192_000 },
+			}).contextWindow,
+		).toBe(192_000);
+		expect(buildProviderModel(kimi, metadata, settings).contextWindow)
+			.toBe(256_000);
+		expect(
+			buildProviderModel(
+				{ id: "catalog-model", reasoningLevels: [] },
+				{ ...metadata, id: "catalog-model", contextWindow: 64_000 },
+				settings,
+			).contextWindow,
+		).toBe(64_000);
+		expect(
+			buildProviderModel(
+				{ id: "cliproxy-only", reasoningLevels: [] },
+				undefined,
+				settings,
+			).contextWindow,
+		).toBe(128_000);
+	});
+
+	test("custom input and output token limits override models.dev", () => {
+		expect(
+			buildProviderModel(
+				{ id: "gb10/glm5.3-flash", reasoningLevels: [] },
+				catalog[0],
+				{
+					...settings,
+					customContext: { "gb10/glm5.3-flash": 512_000 },
+					customMaxTokens: { "gb10/glm5.3-flash": 96_000 },
+				},
+			),
+		).toMatchObject({
+			contextWindow: 512_000,
+			maxTokens: 96_000,
+		});
+	});
+
+	test("marks Chat Completions models as not supporting developer roles", () => {
+		expect(
+			buildProviderModel(
+				{ id: "kimi-k3", reasoningLevels: ["high"] },
+				undefined,
+				settings,
+			).compat,
+		).toEqual({ supportsDeveloperRole: false });
 	});
 
 	test("persistent fast mode modifies GPT request payloads only", () => {

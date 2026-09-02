@@ -47,6 +47,7 @@ export type ContextPolicy = "codex-save" | "codex" | "api";
 export type ProviderSettings = {
 	readonly gpt56ContextPolicy: ContextPolicy;
 	readonly customContext: Readonly<Record<string, number>>;
+	readonly customMaxTokens: Readonly<Record<string, number>>;
 	readonly gptFastMode: boolean;
 	readonly thinkingLevelSource: Readonly<Record<string, ThinkingLevelSource>>;
 };
