@@ -34,9 +34,13 @@ export async function discoverProviderModels(
 		options.getJson(options.modelsDevUrl ?? MODELS_DEV_URL, {}),
 	]);
 	if (cpaResult.status === "rejected") {
-		throw cpaResult.reason instanceof Error
-			? cpaResult.reason
-			: new Error(String(cpaResult.reason));
+		const message = cpaResult.reason instanceof Error
+			? cpaResult.reason.message
+			: String(cpaResult.reason);
+		console.warn(
+			`[cliproxypi] CPA model discovery failed; provider loaded with no models: ${message}`,
+		);
+		return [];
 	}
 	const cpaModels = parseCpaModels(cpaResult.value);
 	let catalog: ModelsDevModel[] = [];

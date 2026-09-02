@@ -86,4 +86,14 @@ describe("startup discovery", () => {
 			reasoning: true,
 		});
 	});
+
+	test("loads with no models when CPA is unavailable", async () => {
+		const models = await discoverProviderModels({
+			baseUrl: "http://localhost:8317/v1",
+			settings,
+			getJson: () => Promise.reject(new Error("CPA unavailable")),
+		});
+
+		expect(models).toEqual([]);
+	});
 });
