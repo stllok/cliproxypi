@@ -21,6 +21,14 @@ describe("persistent settings", () => {
 		});
 	});
 
+	test("accepts the codex-save context profile", () => {
+		expect(
+			parseProviderSettings({
+				cliproxypi: { gpt56ContextPolicy: "codex-save" },
+			}).gpt56ContextPolicy,
+		).toBe("codex-save");
+	});
+
 	test("preserves unrelated Pi settings when saving", () => {
 		expect(
 			withProviderSettings(

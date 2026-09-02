@@ -1,4 +1,5 @@
 import {
+	type ContextPolicy,
 	type CpaModel,
 	type ModelsDevModel,
 	type ProviderModel,
@@ -6,8 +7,11 @@ import {
 	THINKING_LEVELS,
 } from "./types.ts";
 
-export const GPT_56_CODEX_CONTEXT = 272_000;
-export const GPT_56_MAX_CONTEXT = 400_000;
+export const GPT_56_CONTEXT = {
+	"codex-save": 272_000,
+	codex: 400_000,
+	api: 1_000_000,
+} as const satisfies Record<ContextPolicy, number>;
 
 export function findModelsDevModel(
 	model: CpaModel,
@@ -41,17 +45,12 @@ export function buildProviderModel(
 	const gpt56 = isGpt56(model.id);
 	const customContext = settings.customContext[model.id];
 	const derivedContext = gpt56
-		? settings.gpt56ContextPolicy === "codex"
-			? GPT_56_CODEX_CONTEXT
-			: Math.min(
-				metadata?.contextWindow ?? GPT_56_MAX_CONTEXT,
-				GPT_56_MAX_CONTEXT,
-			)
+		? GPT_56_CONTEXT[settings.gpt56ContextPolicy]
 		: metadata?.contextWindow ?? 128_000;
 	const contextWindow = customContext === undefined
 		? derivedContext
 		: gpt56
-		? Math.min(customContext, GPT_56_MAX_CONTEXT)
+		? Math.min(customContext, GPT_56_CONTEXT.api)
 		: customContext;
 	const supported = new Set(model.reasoningLevels);
 	const thinkingLevelMap = Object.fromEntries(

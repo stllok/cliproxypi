@@ -12,7 +12,9 @@ export const DEFAULT_SETTINGS: ProviderSettings = {
 
 const providerSettingsSchema = z
 	.object({
-		gpt56ContextPolicy: z.enum(["codex", "api"]).default("codex"),
+		gpt56ContextPolicy: z.enum(["codex-save", "codex", "api"]).default(
+			"codex",
+		),
 		customContext: z.record(z.string().min(1), z.number().int().positive())
 			.default({}),
 		gptFastMode: z.boolean().default(false),

@@ -65,10 +65,11 @@ The native settings panel writes the `cliproxypi` section in
 `~/.pi/agent/settings.json` and reloads Pi after changes.
 
 - **GPT-5.6 context policy**
-  - `codex`: 272,000 tokens
-  - `api`: models.dev limit capped at 400,000 tokens
+  - `codex-save`: 272,000 tokens
+  - `codex`: 400,000 tokens
+  - `api`: 1,000,000 tokens
 - **Custom model context**: positive token count per discovered model; `auto`
-  removes the override. GPT-5.6 overrides remain capped at 400,000.
+  removes the override. GPT-5.6 overrides remain capped at 1,000,000.
 - **GPT fast mode**: persistent on/off setting. When enabled, GPT requests carry
   `service_tier: "fast"`; no `/fast` session command is needed.
 

@@ -76,19 +76,25 @@ describe("model enrichment", () => {
 		});
 	});
 
-	test("uses Codex or capped API context for GPT-5.6", () => {
+	test("uses configured GPT-5.6 context profile", () => {
 		const cpa = {
 			id: "gpt-5.6-sol",
 			reasoningLevels: ["low", "high"],
 		} satisfies CpaModel;
 		expect(buildProviderModel(cpa, catalog[1], settings).contextWindow)
-			.toBe(272_000);
+			.toBe(400_000);
+		expect(
+			buildProviderModel(cpa, catalog[1], {
+				...settings,
+				gpt56ContextPolicy: "codex-save",
+			}).contextWindow,
+		).toBe(272_000);
 		expect(
 			buildProviderModel(cpa, catalog[1], {
 				...settings,
 				gpt56ContextPolicy: "api",
 			}).contextWindow,
-		).toBe(400_000);
+		).toBe(1_000_000);
 	});
 
 	test("custom context wins but GPT-5.6 remains capped", () => {
@@ -112,7 +118,7 @@ describe("model enrichment", () => {
 				...settings,
 				customContext: { "gpt-5.6-sol": 900_000 },
 			}).contextWindow,
-		).toBe(400_000);
+		).toBe(900_000);
 	});
 
 	test("persistent fast mode modifies GPT request payloads only", () => {

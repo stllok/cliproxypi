@@ -58,13 +58,16 @@ export async function openSettingsPanel(
 
 		if (action.startsWith(CONTEXT_POLICY)) {
 			const value = await ctx.ui.select("GPT-5.6 context limit", [
-				"codex - 272,000 tokens",
-				"api - models.dev limit, capped at 400,000",
+				"codex-save - 272,000 tokens",
+				"codex - 400,000 tokens",
+				"api - 1,000,000 tokens",
 			]);
 			if (value) {
 				settings = {
 					...settings,
-					gpt56ContextPolicy: value.startsWith("api")
+					gpt56ContextPolicy: value.startsWith("codex-save")
+						? "codex-save"
+						: value.startsWith("api")
 						? "api"
 						: "codex",
 				};

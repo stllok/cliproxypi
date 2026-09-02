@@ -34,7 +34,7 @@ export type ModelsDevModel = {
 	};
 };
 
-export type ContextPolicy = "codex" | "api";
+export type ContextPolicy = "codex-save" | "codex" | "api";
 
 export type ProviderSettings = {
 	readonly gpt56ContextPolicy: ContextPolicy;

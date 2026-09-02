@@ -55,7 +55,7 @@ describe("startup discovery", () => {
 		]);
 		expect(first[0]).toMatchObject({
 			id: "gpt-5.6-sol",
-			contextWindow: 400_000,
+			contextWindow: 1_000_000,
 			maxTokens: 128_000,
 			input: ["text", "image"],
 		});
@@ -82,7 +82,7 @@ describe("startup discovery", () => {
 
 		expect(models[0]).toMatchObject({
 			id: "gpt-5.6-sol",
-			contextWindow: 272_000,
+			contextWindow: 400_000,
 			reasoning: true,
 		});
 	});
