@@ -187,7 +187,7 @@ export async function registerCliProxyApi(
 			ctx.model.id,
 		);
 		if (compatiblePayload === event.payload) return;
-		return { payload: compatiblePayload };
+		return compatiblePayload;
 	});
 }
 
