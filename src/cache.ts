@@ -6,6 +6,9 @@ const modelSchema = z.object({
 	id: z.string().min(1),
 	name: z.string().min(1),
 	api: z.enum(["openai-completions", "openai-responses"]).optional(),
+	compact: z.object({
+		supportDeveloperRole: z.boolean().optional(),
+	}).passthrough().optional(),
 	reasoning: z.boolean(),
 	thinkingLevelMap: z.record(z.string(), z.string().nullable()).optional(),
 	input: z.array(z.enum(["text", "image"])),
