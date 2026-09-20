@@ -4,6 +4,8 @@ Pi/omo-ai provider extension for [CLIProxyAPI](https://github.com/router-for-me/
 
 ## Install and run
 
+Requires Pi v0.86.0. Older Pi versions are not supported.
+
 Install directly from GitHub:
 
 ```sh

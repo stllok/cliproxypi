@@ -70,7 +70,14 @@ export function createCliProxyApiAuth(
 			const apiKey = credential?.key ?? configuredApiKey;
 			const result = {
 				auth: {
-					...(apiKey ? { apiKey } : {}),
+					// Pi's OpenAI adapters require a key even for keyless servers.
+					// Satisfy client setup without sending a synthetic credential.
+					...(apiKey
+						? { apiKey }
+						: {
+							apiKey: "unused",
+							headers: { Authorization: null },
+						}),
 					baseUrl,
 				},
 				source: credential

@@ -27,9 +27,13 @@ test("resolves API module beside a compatibility entrypoint", () => {
 
 test("declares Pi runtime packages as required host peers", () => {
 	expect(packageJson.peerDependencies).toEqual({
-		"@earendil-works/pi-ai": "*",
-		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-ai": "^0.86.0",
+		"@earendil-works/pi-coding-agent": "^0.86.0",
 	});
+	expect(packageJson.devDependencies["@earendil-works/pi-ai"]).toBe("0.86.0");
+	expect(packageJson.devDependencies["@earendil-works/pi-coding-agent"]).toBe(
+		"0.86.0",
+	);
 	expect("peerDependenciesMeta" in packageJson).toBe(false);
 });
 

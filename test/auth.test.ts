@@ -18,7 +18,11 @@ describe("CLIProxyAPI login", () => {
 				signal: new AbortController().signal,
 			}),
 		).toEqual({
-			auth: { baseUrl: "http://localhost:8317/v1" },
+			auth: {
+				apiKey: "unused",
+				headers: { Authorization: null },
+				baseUrl: "http://localhost:8317/v1",
+			},
 			source: "default endpoint",
 		});
 	});
