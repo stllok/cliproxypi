@@ -5,7 +5,7 @@ import { join, resolve } from "node:path";
 import { z } from "zod";
 import { writeModelCache } from "../src/cache.ts";
 
-const { PATH } = process.env;
+const { PATH, CLIPROXYPI_HOST_LOADER } = process.env;
 const requestSchema = z.object({
 	model: z.string(),
 	messages: z.array(z.object({ role: z.string(), content: z.unknown() }))
@@ -144,7 +144,7 @@ for (const api of ["openai-completions", "openai-responses"] as const) {
 						}],
 					);
 					const child = Bun.spawn([
-						"node",
+						CLIPROXYPI_HOST_LOADER ? "bun" : "node",
 						resolve("test/fixtures/pi-runtime.ts"),
 						resolve("extensions/index.ts"),
 						api,
@@ -152,6 +152,11 @@ for (const api of ["openai-completions", "openai-responses"] as const) {
 						cwd: agentDir,
 						env: {
 							PATH,
+							...(CLIPROXYPI_HOST_LOADER
+								? {
+									CLIPROXYPI_HOST_LOADER,
+								}
+								: {}),
 							HOME: agentDir,
 							PI_CODING_AGENT_DIR: agentDir,
 							PI_OFFLINE: "1",

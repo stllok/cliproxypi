@@ -35,6 +35,10 @@ export function piAiApiModuleUrl(
 	entrypoint: string,
 	api: CliProxyApi,
 ): string {
+	// omo-ai resolves its virtual host module to the bare package name.
+	if (entrypoint === "@earendil-works/pi-ai") {
+		return `${entrypoint}/api/${api}`;
+	}
 	return new URL(`./api/${api}.js`, entrypoint).href;
 }
 

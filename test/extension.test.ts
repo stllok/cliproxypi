@@ -25,6 +25,15 @@ test("resolves API module beside a compatibility entrypoint", () => {
 	);
 });
 
+test("resolves API modules for omo-ai virtual package entrypoints", async () => {
+	for (const api of ["openai-completions", "openai-responses"] as const) {
+		const specifier = piAiApiModuleUrl("@earendil-works/pi-ai", api);
+		expect(specifier).toBe(`@earendil-works/pi-ai/api/${api}`);
+		const module = await import(specifier);
+		expect(module).toBeDefined();
+	}
+});
+
 test("declares Pi runtime packages as required host peers", () => {
 	expect(packageJson.peerDependencies).toEqual({
 		"@earendil-works/pi-ai": "^0.86.0",

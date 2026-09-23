@@ -14,7 +14,12 @@ import {
 const [extensionPath, modelId] = process.argv.slice(2);
 assert.ok(extensionPath);
 assert.ok(modelId);
-const loaded = await discoverAndLoadExtensions([extensionPath], process.cwd());
+const { CLIPROXYPI_HOST_LOADER } = process.env;
+const loadExtensions: typeof discoverAndLoadExtensions = CLIPROXYPI_HOST_LOADER
+	? (await import(CLIPROXYPI_HOST_LOADER))
+		.discoverAndLoadExtensions
+	: discoverAndLoadExtensions;
+const loaded = await loadExtensions([extensionPath], process.cwd());
 assert.deepEqual(loaded.errors, []);
 assert.equal(loaded.extensions.length, 1);
 assert.equal(loaded.runtime.pendingNativeProviderRegistrations.length, 1);
