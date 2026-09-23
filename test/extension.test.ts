@@ -3,7 +3,6 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import type { Provider } from "@earendil-works/pi-ai";
 import {
 	DEFAULT_PROVIDER_NAME,
-	piAiApiModuleUrl,
 	registerCliProxyApi,
 } from "../extensions/index.ts";
 import packageJson from "../package.json" with { type: "json" };
@@ -12,26 +11,6 @@ import type { ProviderModel } from "../src/types.ts";
 
 test("uses cliproxypi as the provider credential key", () => {
 	expect(DEFAULT_PROVIDER_NAME).toBe("cliproxypi");
-});
-
-test("resolves API module beside a compatibility entrypoint", () => {
-	expect(
-		piAiApiModuleUrl(
-			"file:///opt/senpi/node_modules/@earendil-works/pi-ai/dist/compat.js",
-			"openai-completions",
-		),
-	).toBe(
-		"file:///opt/senpi/node_modules/@earendil-works/pi-ai/dist/api/openai-completions.js",
-	);
-});
-
-test("resolves API modules for omo-ai virtual package entrypoints", async () => {
-	for (const api of ["openai-completions", "openai-responses"] as const) {
-		const specifier = piAiApiModuleUrl("@earendil-works/pi-ai", api);
-		expect(specifier).toBe(`@earendil-works/pi-ai/api/${api}`);
-		const module = await import(specifier);
-		expect(module).toBeDefined();
-	}
 });
 
 test("declares Pi runtime packages as required host peers", () => {

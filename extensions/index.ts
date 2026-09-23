@@ -6,9 +6,10 @@ import {
 import {
 	type ApiKeyCredential,
 	createProvider,
-	lazyApi,
 	type Model,
-} from "@earendil-works/pi-ai";
+	openAICompletionsApi,
+	openAIResponsesApi,
+} from "@earendil-works/pi-ai/compat";
 import ky from "ky";
 import { join } from "node:path";
 import {
@@ -29,18 +30,6 @@ import type { CliProxyApi, ProviderModel } from "../src/types.ts";
 
 const DEFAULT_BASE_URL = "http://localhost:8317/v1";
 export const DEFAULT_PROVIDER_NAME = "cliproxypi";
-const PI_AI_ENTRYPOINT = import.meta.resolve("@earendil-works/pi-ai");
-
-export function piAiApiModuleUrl(
-	entrypoint: string,
-	api: CliProxyApi,
-): string {
-	// omo-ai resolves its virtual host module to the bare package name.
-	if (entrypoint === "@earendil-works/pi-ai") {
-		return `${entrypoint}/api/${api}`;
-	}
-	return new URL(`./api/${api}.js`, entrypoint).href;
-}
 
 const getJson: JsonGetter = async (url, headers) =>
 	ky.get(url, {
@@ -112,16 +101,11 @@ export async function registerCliProxyApi(
 			},
 			models: runtimeModels(models, baseUrl),
 			api: {
-				"openai-completions": lazyApi(() =>
-					import(
-						piAiApiModuleUrl(PI_AI_ENTRYPOINT, "openai-completions")
-					)
-				),
-				"openai-responses": lazyApi(() =>
-					import(
-						piAiApiModuleUrl(PI_AI_ENTRYPOINT, "openai-responses")
-					)
-				),
+				// Resolve streams through the host's compat module. Deep API
+				// imports can load a local pi-ai with a different context contract,
+				// silently dropping the host's system prompt and tool declarations.
+				"openai-completions": openAICompletionsApi(),
+				"openai-responses": openAIResponsesApi(),
 			},
 		}));
 	};

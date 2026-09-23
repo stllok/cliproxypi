@@ -15,20 +15,24 @@ const [extensionPath, modelId] = process.argv.slice(2);
 assert.ok(extensionPath);
 assert.ok(modelId);
 const { CLIPROXYPI_HOST_LOADER } = process.env;
-const loadExtensions: typeof discoverAndLoadExtensions = CLIPROXYPI_HOST_LOADER
-	? (await import(CLIPROXYPI_HOST_LOADER))
-		.discoverAndLoadExtensions
-	: discoverAndLoadExtensions;
-const loaded = await loadExtensions([extensionPath], process.cwd());
+// Use the host's registry as well as its loader. Mixing a host loader with
+// the local registry hides context-contract mismatches at the provider boundary.
+const host = CLIPROXYPI_HOST_LOADER
+	? await import(CLIPROXYPI_HOST_LOADER)
+	: { discoverAndLoadExtensions, ModelRegistry, ModelRuntime };
+const loaded = await host.discoverAndLoadExtensions(
+	[extensionPath],
+	process.cwd(),
+);
 assert.deepEqual(loaded.errors, []);
 assert.equal(loaded.extensions.length, 1);
 assert.equal(loaded.runtime.pendingNativeProviderRegistrations.length, 1);
-const runtime = await ModelRuntime.create({
+const runtime = await host.ModelRuntime.create({
 	credentials: new InMemoryCredentialStore(),
 	modelsPath: null,
 	refreshOnCreate: false,
 });
-const registry = new ModelRegistry(runtime);
+const registry = new host.ModelRegistry(runtime);
 for (const { provider } of loaded.runtime.pendingNativeProviderRegistrations) {
 	registry.registerProvider(provider);
 }

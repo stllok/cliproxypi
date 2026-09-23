@@ -126,3 +126,18 @@ Use `0` instead to disable the stream-start watchdog.
 ```sh
 bun run check
 ```
+
+To verify an omo-ai/Senpi installation, also run the runtime tests against its
+bundled SDK entrypoint (adjust the path for your installation):
+
+```sh
+CLIPROXYPI_HOST_LOADER="$HOME/.bun/install/global/node_modules/@code-yeongyu/senpi/dist/bundle/index.js" \
+  bun test test/runtime.test.ts
+```
+
+This uses the host's extension loader **and** model registry, and checks the
+outgoing system prompt and tool declarations for both OpenAI APIs, with API-key
+and keyless authentication. Testing only the host loader with the local Pi
+registry can hide incompatible context contracts. Streaming implementations must
+come from the host's `@earendil-works/pi-ai/compat` factories, not deep API imports
+that may resolve to the extension's own dependency copy.

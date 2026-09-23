@@ -15,7 +15,7 @@ const requestSchema = z.object({
 	tools: z.array(z.object({
 		name: z.string().optional(),
 		function: z.object({ name: z.string() }).optional(),
-	})),
+	})).optional(),
 });
 
 for (const api of ["openai-completions", "openai-responses"] as const) {
@@ -194,7 +194,7 @@ for (const api of ["openai-completions", "openai-responses"] as const) {
 							role: "system",
 							content: "runtime-system-marker",
 						});
-						const tool = request.body.tools[0];
+						const tool = request.body.tools?.[0];
 						expect(tool?.function?.name ?? tool?.name).toBe(
 							"runtime_probe",
 						);
