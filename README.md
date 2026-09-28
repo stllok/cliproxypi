@@ -68,12 +68,12 @@ Run:
 The native settings panel writes the `cliproxypi` section in
 `~/.pi/agent/settings.json` and reloads Pi after changes.
 
-- **GPT-5.6 context policy**
+- **GPT-5.6 / GPT-6 context policy** (all variants; configured by `gpt56ContextPolicy`)
   - `codex-save`: 272,000 tokens
   - `codex`: 400,000 tokens
   - `api`: 1,000,000 tokens
 - **Custom model input/context tokens**: positive token count per discovered
-  model; `auto` removes the override. GPT-5.6 overrides remain capped at
+  model; `auto` removes the override. GPT-5.6 and GPT-6 overrides remain capped at
   1,000,000.
 - **Custom model output tokens**: positive token count per discovered model;
   `auto` restores the models.dev value.

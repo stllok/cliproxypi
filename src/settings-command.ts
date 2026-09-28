@@ -8,7 +8,7 @@ import { loadProviderSettings, saveProviderSettings } from "./settings.ts";
 import type { ProviderSettings, ThinkingLevelSource } from "./types.ts";
 
 const DONE = "Done";
-const CONTEXT_POLICY = "GPT-5.6 context policy";
+const CONTEXT_POLICY = "GPT-5.6 / GPT-6 context policy";
 const FAST_MODE = "GPT fast mode";
 const CUSTOM_INPUT = "Custom model input/context tokens";
 const CUSTOM_OUTPUT = "Custom model output tokens";
@@ -85,7 +85,7 @@ export async function openSettingsPanel(
 		if (action === undefined || action === DONE) break;
 
 		if (action.startsWith(CONTEXT_POLICY)) {
-			const value = await ctx.ui.select("GPT-5.6 context limit", [
+			const value = await ctx.ui.select("GPT-5.6 / GPT-6 context limit", [
 				"codex-save - 272,000 tokens",
 				"codex - 400,000 tokens",
 				"api - 1,000,000 tokens",

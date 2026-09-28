@@ -44,15 +44,17 @@ export function buildProviderModel(
 	settings: ProviderSettings,
 ): ProviderModel {
 	const gpt56 = isGpt56(model.id);
+	const usesContextPolicy = gpt56 ||
+		normalizeModelId(model.id).startsWith("gpt6");
 	const customContext = settings.customContext[model.id];
-	const derivedContext = gpt56
+	const derivedContext = usesContextPolicy
 		? GPT_56_CONTEXT[settings.gpt56ContextPolicy]
 		: normalizeModelId(model.id) === "kimik3256k"
 		? 256_000
 		: metadata?.contextWindow ?? 128_000;
 	const contextWindow = customContext === undefined
 		? derivedContext
-		: gpt56
+		: usesContextPolicy
 		? Math.min(customContext, GPT_56_CONTEXT.api)
 		: customContext;
 	const source = settings.thinkingLevelSource[model.id] ?? "cliproxyapi";
